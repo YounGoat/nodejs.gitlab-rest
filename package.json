@@ -1,0 +1,28 @@
+{
+    "bin": {},
+    "dependencies": {},
+    "devDependencies": {
+        "mocha": "^3.3.0"
+    },
+    "directories": {},
+    "scripts": {
+        "test": "mocha"
+    },
+    "name": "gitlab-rest",
+    "version": "0.0.1",
+    "main": "index.js",
+    "keywords": [
+        "gitlab"
+    ],
+    "homepage": "https://github.com/YounGoat/nodejs.gitlab-rest",
+    "description": "GitLab API based on offical API V4",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/YounGoat/nodejs.gitlab-rest.git"
+    },
+    "author": {
+        "name": "YounGoat",
+        "email": "youngoat@163.com",
+        "url": "https://youngoat.github.io"
+    }
+}
