@@ -1,11 +1,5 @@
 /**
- * @see
- *   GitLab API
- *   https://gitlab.com/help/api/README.md
- *   Now the version is v4.
- *   
- *   Repositories API
- *   https://gitlab.com/help/api/repositories.md
+ * @see https://gitlab.com/gitlab-org/gitlab-ce/blob/8-13-stable/doc/api/repositories.md
  */
 
 'use strict';
@@ -18,10 +12,8 @@ const MODULE_REQUIRE = 1
     , undertake = require('undertake')
     ;
 
-module.exports = function getBlob(_agent, po) {
-    return undertake(function*() {
-        let urlname = modifyUrl.query(`/projects/${po.project}/repository/blobs/${po.ref}`, { filepath: po.path });
-        let content = yield _agent.get(urlname);
-        return content;
-    });
+module.exports = function*(_agent, options) {
+    let urlname = modifyUrl.query(`/projects/${options.project_id}/repository/blobs/${options.ref}`, { filepath: options.path });
+    let content = yield _agent.get(urlname);
+    return content;
 };

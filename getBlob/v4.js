@@ -1,62 +1,49 @@
 /**
- * @see
- *   GitLab API
- *   https://gitlab.com/help/api/README.md
- *   Now the version is v4.
- *   
- *   Repositories API
- *   https://gitlab.com/help/api/repositories.md
+ * @see https://gitlab.com/gitlab-org/gitlab-ce/blob/11-4-stable/doc/api/repositories.md
  */
 
 'use strict';
 
 const MODULE_REQUIRE = 1
     /* built-in */
+    , path = require('path')
     
     /* NPM */
     , modifyUrl = require('jinang/modifyUrl')
-    , undertake = require('undertake')
+    , noda = require('noda')
+
+    /* in-package */
+    , findObjects = noda.inRequire('findObjects')
     ;
 
-module.exports = function getBlob(_agent, po) {
-    return undertake(function*() {
-        
-        // ---------------------------
-        // Get Blob Id.
+module.exports = function*(_agent, options) {
+    // ---------------------------
+    // Get Blob Id.
 
-        let content = null;
-        let blob_id = null;
-        GET_BLOB_SHA: {
-            let blobname = null;
-            let queries = {};
-            if (po.path) {
-                // Trim the leading slash.
-                let pathname = po.path.replace(/^\//, '');
+    let content = null;
 
-                // Keep the basename and query the dirname.
-                let names = pathname.split('/');
-                blobname = names.pop();
-                queries.path = names.join('/');
+    let blobId = null;
+    GET_BLOB_SHA: {
+        let options2 = Object.assign({}, options);
+        options2.path = path.dirname(options.path);
+        let metas = yield findObjects(options2);
+
+        let name = path.basename(options.path);
+        metas.find(meta => {
+            if (meta.name == name) {
+                blobId = meta.id;
+                return true;
             }
+        });
+    }
 
-            if (po.ref) {
-                queries.ref = po.ref;
-            }
+    // ---------------------------
+    // Get Blob Content.
 
-            let urlname = modifyUrl.query(`/projects/${po.project}/repository/tree`, queries);
-            let objectMetas = yield _agent.get(urlname);
-            let meta = objectMetas.find(meta => meta.name == blobname);
-            if (meta) blob_id = meta.id;
-        }
+    if (blobId) {
+        let urlname = `/projects/${options.project_id}/repository/blobs/${blobId}/raw`;
+        content = yield _agent.get(urlname);
+    }
 
-        // ---------------------------
-        // Get Blob Content.
-
-        if (blob_id) {
-            let urlname = `/projects/${po.project}/repository/blobs/${blob_id}/raw`;
-            content = yield _agent.get(urlname);
-        }
-
-        return content;
-    });
+    return content;
 };

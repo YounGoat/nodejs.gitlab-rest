@@ -14,7 +14,7 @@ const API = require('gitlab-rest');
 
 let rest = new API({ private_token: 'personal-access-token' });
 
-rest.whoami()
+rest.whoAmI()
     .then(info => {
         // ...
     })
@@ -26,8 +26,8 @@ rest.whoami()
 ###	Standalone Function
 
 ```javascript
-const whoami = require('gitlab-rest/whoami');
-whoami({ private_token: 'personal-access-token' })
+const whoAmI = require('gitlab-rest/whoAmI');
+whoAmI({ private_token: 'personal-access-token' })
     .then(info => {
         // ...
     })
@@ -38,31 +38,91 @@ whoami({ private_token: 'personal-access-token' })
 
 ##	API
 
-*	Class __Rest__({ *private_token* })
-*	Promise(Object[]) __\<rest\>.findGroups__(Object *options*)
-*	Promise(Object[]) __\<rest\>.findObjects__(Object *options*)
-*	Promise(Object[]) __\<rest\>.findProjects__(Object *options*)
-*	Promise(Object[]) __\<rest\>.findUsers__(Object *options*)
-*	Promise(Object) __\<rest\>.getBlob__(Object *options*)
-*	Promise(Object) __\<rest\>.getGroup__(Object *options*)
-*	Promise(Object) __\<rest\>.getProject__(Object *options*)
-*	Promise(Object) __\<rest\>.getUser__(Object *options*)
-*	Promise(Object) __\<rest\>.whoami__()
+This module is made up of one class and a number of methods which may be members or standalone.
 
-All methods are asynchronous and will return instances of `Promise`. Hereafter, *response* means what to be obtained in `.then((response) => { /* ... */ })`.
+All methods are asynchronous and will return instances of `Promise`. Hereafter, *response* means what to be obtained in `.then(response => { /* ... */ })`.
 
-All methods may be required and invoked by itself as what we see in [Get Started, Standalone Function](#standalone-function).
+All methods may be required and invoked by itself as what we see in [Get Started, Standalone Function](#standalone-function). Actually, if a method is invoked by itself, an instance of class `Rest` will be created implicitly. In such cases, necessary info required by constructor of class `Rest` should occur in object `options` or `options.api` with the same names.
 
-##  Examples
+*	Class __Rest__(Object *api*)  
+    To create an instance of gitlab RESTful API.
+    -   *string* __api.endpoint__ OPTIONAL DEFAULT
+    -   *string* __api.version__ OPTIONAL
+    -   *string* __api.access_token__ OPTIONAL
+    -   *string* __api.private_token__ OPTIONAL
 
-Before execute the examples, please replace the `private_token` with your own personal access token.
+*	Promise(true) [\<rest\>].__downloadProject__(Object *options*)  
+    To obtain meta data of matching groups.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.namespace__ OPTIONAL
+    -   *string* __options.project_name__ OPTIONAL
+    -   *string* __options.project_id__ OPTIONAL
+    -   *string* __options.path__
+    -   *string* __options.ref__ OPTIONAL
+    -   *string* __options.target__
 
-*	[findGroups](./example/findGroups.js)
-*	[findObjects](./example/findObjects.js)
-*	[findProjects](./example/findProjects.js)
-*	[findUsers](./example/findUsers.js)
-*	[getBlob](./example/getBlob.js)
-*	[getGroup](./example/getGroup.js)
-*	[getProject](./example/getProject.js)
-*	[getUser](./example/getUser.js)
-*	[whoami](./example/whoami.js)
+*	Promise(Object[]) [\<rest\>].__findGroups__(Object *options*)  
+    To obtain meta data of matching groups.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.search__ OPTIONAL
+
+*	Promise(Object[]) [\<rest\>].__findObjects__(Object *options*)  
+    To obtain meta data of matching objects / files.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.project_id__
+    -   *string* __options.path__ OPTIONAL
+    -   *string* __options.ref__ OPTIONAL  
+    -   *boolean* __options.recursive__ OPTIONAL  
+
+*	Promise(Object[]) [\<rest\>].__findProjects__(Object *options*)  
+    To obtain meta data of matching projects.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.username OPTIONAL
+    -   *string* __options.group_id OPTIONAL
+
+*	Promise(Object) [\<rest\>].__getBlob__(Object *options*)  
+    To obtain blob data of specified object / file.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.namespace__ OPTIONAL  
+    -   *string* __options.project_name__ OPTIONAL  
+    -   *string* __options.project_id__ OPTIONAL  
+    -   *string* __options.path__  
+    -   *string* __options.ref__ OPTIONAL  
+
+*	Promise(Object) [\<rest\>].__getGroup__(Object *options*)  
+    To obtain details of specified group.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.id__
+
+*	Promise(Object) [\<rest\>].__getProject__(Object *options*)  
+    To obtain details of specified project.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.id__
+    
+   
+*	Promise(Object) [\<rest\>].__getUser__(Object *options*)  
+    To obtain details of specified user.
+    -   *object* __options.api__ OPTIONAL
+    -   *string* __options.id__
+
+*	Promise(Object) [\<rest\>].__whoAmI__(Object *options*)  
+    To obtain details of user who owns the token used.
+    -   *object* __options.api__ OPTIONAL
+
+*	Promise(Object) [\<rest\>].__whoIsThat__(Object *options*)  
+    To obtain details of GitLab server.
+    -   *object* __options.api__ OPTIONAL
+
+### FAQ
+
+*   What is __namespace__?  
+    Usernames and groupnames fall under a special category called namespaces.
+
+*   What is __ref__?  
+    It may be __commit__ (somebody gets used to call it "commit id"), __branch__ or __tag__.
+
+##  References
+
+*   [GitLab API (current)](https://gitlab.com/help/api/README.md)
+*   [GitLab API (v4, 0.11.4)](https://gitlab.com/gitlab-org/gitlab-ce/blob/11-4-stable/doc/api/README.md)
+*   [GitLab API (v3, deprecated)](https://gitlab.com/gitlab-org/gitlab-ce/blob/8-16-stable/doc/api/README.md)

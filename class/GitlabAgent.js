@@ -32,7 +32,7 @@ class GitlabAgent extends SimpleAgent {
 		let endPoint = 'https://gitlab.com/api/v4';
 		let version = 'v4';
 		let headers = {};
-
+		
 		if (api.endpoint) {
 			endPoint = api.endpoint;
 		}
@@ -58,15 +58,38 @@ class GitlabAgent extends SimpleAgent {
 		let beforeCallback = (err, response) => {
 			if (err) throw err;
 
-			let errorName = null, code = response.statusCode;
-			if (code >= 500) errorName = 'server error';
-			else if (code >= 300 && code != 404) errorName = 'improper request';
-			else if (code < 200) errorName = 'unexpected server response';
-			if (errorName) throw new Error(`${errorName}: ${code}, ${response.statusMessage}`);
+			let errorName, errorMsg, code = response.statusCode;
+			if (code >= 500) {
+				errorName = 'server error';
+			}
+			else if (code < 200 || code >= 300) {
+				errorName = 'unexpected server response';
+			}
+			if (errorName) {
+				let errorMsg = response.body && response.body.message ? response.body.message : response.statusMessage;
+				throw new Error(`${errorName}: ${code}, ${errorMsg}`);
+			}
 
-			if (code == 404) return null;
-			if (typeof response.body != 'string') return response.body;
-			return response.bodyBuffer;
+			if (code == 404) {
+				return null;
+			}
+			else if (response.body instanceof Array && response.headers['x-page']) {
+				return {
+					page        : response.headers['x-page'],
+					next_page   : response.headers['x-next-page'],
+					prev_page   : response.headers['x-prev-page'],
+					per_page    : response.headers['x-per-page'],
+					total       : response.headers['x-total'],
+					total_pages : response.headers['x-total-pages'],
+					items       : response.body,					
+				};
+			}
+			else if (typeof response.body != 'string') {
+				return response.body;
+			}
+			else {
+				return response.bodyBuffer;
+			}
 		};
 
 		let agentOptions = {
@@ -81,6 +104,7 @@ class GitlabAgent extends SimpleAgent {
 }
 
 GitlabAgent.getOne = function(options) {
+	// 这种设计，是为了规避方法文件和主类文件之间的递归引用（require），实属无奈之举。
 	if (this && this.__proto__.classId == noda.inRequire('class.id')) {
 		return this.agent;
 	}

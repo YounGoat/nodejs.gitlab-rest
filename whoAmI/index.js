@@ -1,0 +1,1 @@
+module.exports = require('../lib/create_method')(__dirname);
