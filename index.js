@@ -17,6 +17,7 @@ function Rest(token) {
 Rest.prototype.classId = noda.inRequire('class.id');
 
 [ 
+    'findBadges',
     'findGroups',
     'findProjects',
     'findObjects',

@@ -26,6 +26,7 @@ class GitlabAgent extends SimpleAgent {
 	 * @param  {string}  [api.version]
 	 * @param  {string}  [api.access_token]
 	 * @param  {string}  [api.private_token]
+	 * @param  {boolean} [api.verbose]
 	 */
 	constructor(api) {
 		
@@ -53,6 +54,13 @@ class GitlabAgent extends SimpleAgent {
 
 		if (api.private_token) {
 			headers['PRIVATE-TOKEN'] = api.private_token;
+		}
+
+		let beforeRequest = null;
+		if (api.verbose) {
+			beforeRequest = req => {
+				console.log(req.url);
+			};
 		}
 
 		let beforeCallback = (err, response) => {
@@ -95,6 +103,7 @@ class GitlabAgent extends SimpleAgent {
 		let agentOptions = {
 			endPoint,
 			headers,
+			beforeRequest,
 			beforeCallback,
 		};
 
@@ -109,7 +118,7 @@ GitlabAgent.getOne = function(options) {
 		return this.agent;
 	}
 	
-	const po = parseOptions(options.api ? options.api : options, {
+	const po = parseOptions(options && options.api ? options.api : options, {
 		explicit: true,
 		caseSensitive: false,
 		keepNameCase: false,
